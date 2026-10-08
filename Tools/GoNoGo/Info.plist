@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.calclone.gonogo</string>
+    <key>CFBundleName</key>
+    <string>gonogo</string>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>CalClone go/no-go check: lists calendars and creates then deletes one test event.</string>
+</dict>
+</plist>
