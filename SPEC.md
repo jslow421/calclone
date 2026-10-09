@@ -1,4 +1,4 @@
-# Calendar Blocker — Spec
+# CalClone — Spec
 
 A macOS menu bar app that mirrors personal calendar events onto a work calendar as opaque "Blocked" events during configurable working hours, so colleagues see accurate availability without seeing personal details.
 
@@ -35,7 +35,7 @@ A macOS menu bar app that mirrors personal calendar events onto a work calendar 
 Separate pure logic from system I/O so the core is unit-testable without a real calendar.
 
 ```
-CalendarBlocker/
+CalClone/
 ├── Core/                       # Swift package, no EventKit imports
 │   ├── Config.swift            # Codable settings model
 │   ├── Interval.swift          # Date interval type + ops (clip, pad, merge)
@@ -47,7 +47,7 @@ CalendarBlocker/
 ├── Sync/
 │   └── SyncEngine.swift        # triggers, debounce, orchestration
 └── App/
-    ├── CalendarBlockerApp.swift  # MenuBarExtra + Settings scene
+    ├── CalCloneApp.swift  # MenuBarExtra + Settings scene
     ├── SettingsView.swift
     └── LoginItem.swift
 ```
@@ -56,27 +56,27 @@ CalendarBlocker/
 
 ## 5. Configuration
 
-| Setting | Type | Default |
-|---|---|---|
-| Source calendars | multi-select of EKCalendars | none (must choose) |
-| Target calendar | single EKCalendar, must allow modifications | none (must choose) |
-| Working days | set of weekdays | Mon-Fri |
-| Working hours | start/end time, optionally per-day overrides | 08:00-17:00 |
-| Time zone | system time zone | system |
-| Padding before | minutes | 0 |
-| Padding after | minutes | 0 |
-| Padding order | `padThenClip` or `clipThenPad` | `padThenClip` |
-| Merge overlapping/adjacent blocks | bool | true |
-| Merge gap threshold | minutes (blocks closer than this merge) | 0 |
-| Skip all-day events | bool | true |
-| Skip declined events | bool | true |
-| Skip events marked Free | bool | true |
-| Skip tentative events | bool | false |
-| Lookahead window | days | 30 |
-| Block title | string | "Blocked" |
-| Block availability | busy / tentative / OOF where supported | busy |
-| Safety-net poll interval | minutes | 15 |
-| Launch at login | bool | true |
+| Setting                           | Type                                         | Default            |
+| --------------------------------- | -------------------------------------------- | ------------------ |
+| Source calendars                  | multi-select of EKCalendars                  | none (must choose) |
+| Target calendar                   | single EKCalendar, must allow modifications  | none (must choose) |
+| Working days                      | set of weekdays                              | Mon-Fri            |
+| Working hours                     | start/end time, optionally per-day overrides | 08:00-17:00        |
+| Time zone                         | system time zone                             | system             |
+| Padding before                    | minutes                                      | 0                  |
+| Padding after                     | minutes                                      | 0                  |
+| Padding order                     | `padThenClip` or `clipThenPad`               | `padThenClip`      |
+| Merge overlapping/adjacent blocks | bool                                         | true               |
+| Merge gap threshold               | minutes (blocks closer than this merge)      | 0                  |
+| Skip all-day events               | bool                                         | true               |
+| Skip declined events              | bool                                         | true               |
+| Skip events marked Free           | bool                                         | true               |
+| Skip tentative events             | bool                                         | false              |
+| Lookahead window                  | days                                         | 30                 |
+| Block title                       | string                                       | "Blocked"          |
+| Block availability                | busy / tentative / OOF where supported       | busy               |
+| Safety-net poll interval          | minutes                                      | 15                 |
+| Launch at login                   | bool                                         | true               |
 
 ## 6. Sync algorithm
 
@@ -129,6 +129,7 @@ Every created event gets an opaque marker so the app can find its own events eve
 ## 8. UI
 
 **Menu bar item** (SF Symbol, e.g. `calendar.badge.clock`):
+
 - Status line: "Last synced 2 min ago · 14 blocks"
 - Sync Now
 - Pause / Resume
@@ -136,6 +137,7 @@ Every created event gets an opaque marker so the app can find its own events eve
 - Quit
 
 **Settings window** (SwiftUI `Settings` scene):
+
 - Calendars: source multi-select, target picker (only writable calendars; warn if the target is also in the source list, as this would cause a loop)
 - Schedule: working days, hours, per-day overrides
 - Padding: before/after minutes, padding order

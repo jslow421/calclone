@@ -2,3 +2,5 @@
 .swiftpm/
 *.xcodeproj
 xcuserdata/
+
+.worktrees/
