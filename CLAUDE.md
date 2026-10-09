@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-CalClone is currently **spec-only**: the repo contains `SPEC.md`, `README.md`, and `LICENSE.md`, with no source code, package manifest, or build tooling yet. `SPEC.md` is the source of truth for requirements, architecture, config defaults, the sync algorithm, edge cases, and milestones. Read it before implementing anything. Update this file with real build/test commands once a Swift package or Xcode project exists.
+Milestones 1 (go/no-go EventKit CLI in `Tools/GoNoGo`) and 2 (`Core/` package) are done. `SPEC.md` is the source of truth for requirements, architecture, config defaults, the sync algorithm, edge cases, and milestones. Read it before implementing anything. Next is milestone 3 (EventKit adapter and dry-run CLI).
+
+## Commands
+
+- Core tests: `cd Core && swift test` (XCTest, no dependencies).
 
 ## What it is
 
