@@ -2,6 +2,8 @@ import EventKit
 import Foundation
 
 // Milestone 1 go/no-go check. Read-only unless --target <calendarIdentifier> is given.
+// --keep leaves the test event in place so it can be checked on the work side;
+// --cleanup (with --target) deletes leftover test events.
 // Only ever writes to the target calendar, and only deletes events carrying the marker.
 
 let marker = "cal-blocker:v1"
@@ -12,16 +14,23 @@ func fail(_ message: String) -> Never {
 }
 
 var targetID: String?
+var keep = false
+var cleanup = false
+let usage = "usage: gonogo [--target <calendarIdentifier> [--keep | --cleanup]]"
 var args = CommandLine.arguments.dropFirst()
 while let arg = args.popFirst() {
     switch arg {
     case "--target":
         guard let v = args.popFirst() else { fail("--target needs a calendar identifier") }
         targetID = v
+    case "--keep": keep = true
+    case "--cleanup": cleanup = true
     default:
-        fail("unknown argument \(arg)\nusage: gonogo [--target <calendarIdentifier>]")
+        fail("unknown argument \(arg)\n\(usage)")
     }
 }
+if keep && cleanup { fail("--keep and --cleanup are mutually exclusive") }
+if (keep || cleanup) && targetID == nil { fail("--keep/--cleanup need --target\n\(usage)") }
 
 let store = EKEventStore()
 
@@ -56,12 +65,40 @@ guard calendar.allowsContentModifications else { fail("calendar '\(calendar.titl
 
 print("\nTarget: \(calendar.title) (source: \(calendar.source.title))")
 
+let testTitle = "Blocked (gonogo test)"
+
+/// Removes marked test events from the target calendar only; returns how many.
+func removeMarked(_ events: [EKEvent]) -> Int {
+    var deleted = 0
+    for e in events where e.notes == marker && e.title == testTitle && e.calendar.calendarIdentifier == calendar.calendarIdentifier {
+        do {
+            try store.remove(e, span: .thisEvent, commit: false)
+            deleted += 1
+        } catch {
+            fail("remove failed: \(error) — delete '\(testTitle)' manually")
+        }
+    }
+    do {
+        try store.commit()
+    } catch {
+        fail("commit failed: \(error)")
+    }
+    return deleted
+}
+
+if cleanup {
+    let now = Date()
+    let predicate = store.predicateForEvents(withStart: now, end: now.addingTimeInterval(7 * 86400), calendars: [calendar])
+    print("Cleanup: deleted \(removeMarked(store.events(matching: predicate))) test event(s).")
+    exit(0)
+}
+
 // Create: attendee-less event tomorrow at 03:00 for 15 minutes, carrying the marker.
 let cal = Calendar.current
 let start = cal.date(bySettingHour: 3, minute: 0, second: 0, of: cal.date(byAdding: .day, value: 1, to: Date())!)!
 let event = EKEvent(eventStore: store)
 event.calendar = calendar
-event.title = "Blocked (gonogo test)"
+event.title = testTitle
 event.notes = marker
 event.startDate = start
 event.endDate = start.addingTimeInterval(15 * 60)
@@ -81,19 +118,10 @@ let predicate = store.predicateForEvents(withStart: start.addingTimeInterval(-60
 let found = store.events(matching: predicate).filter { $0.notes == marker && $0.title == event.title }
 print("Re-fetch: found \(found.count) marked event(s); attendees: \(found.first?.attendees?.count ?? 0)")
 
+if keep {
+    print("Kept event. Check it on the work side (web/Outlook), then run with --target \(targetID) --cleanup.")
+    exit(0)
+}
+
 // Delete only marked events from the target calendar.
-var deleted = 0
-for e in found where e.notes == marker && e.calendar.calendarIdentifier == calendar.calendarIdentifier {
-    do {
-        try store.remove(e, span: .thisEvent, commit: false)
-        deleted += 1
-    } catch {
-        fail("remove failed: \(error) — test event may remain; delete 'Blocked (gonogo test)' manually")
-    }
-}
-do {
-    try store.commit()
-} catch {
-    fail("commit failed: \(error)")
-}
-print("Deleted \(deleted) event(s). GO: create/save/fetch/delete all succeeded.")
+print("Deleted \(removeMarked(found)) event(s). GO: create/save/fetch/delete all succeeded.")
