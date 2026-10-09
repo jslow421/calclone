@@ -5,7 +5,7 @@ public enum Weekday: Int, Codable, CaseIterable, Hashable {
     case sunday = 1, monday, tuesday, wednesday, thursday, friday, saturday
 }
 
-/// A wall-clock time. `hour` may be 24 (with minute 0) to mean end of day.
+/// A wall-clock time, 00:00 to 23:59.
 public struct TimeOfDay: Codable, Hashable {
     public var hour: Int
     public var minute: Int

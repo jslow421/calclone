@@ -66,15 +66,17 @@ public enum BlockPlanner {
     /// (fall back) uses its first occurrence.
     static func workingInterval(on dayStart: Date, hours: DayHours, calendar: Calendar) -> Interval? {
         guard let start = resolve(hours.start, on: dayStart, calendar: calendar),
-              let end = resolve(hours.end, on: dayStart, calendar: calendar) else { return nil }
+              var end = resolve(hours.end, on: dayStart, calendar: calendar) else { return nil }
+        // An end of 00:00 means the midnight that closes the day.
+        if hours.end == TimeOfDay(hour: 0), hours.start != TimeOfDay(hour: 0),
+           let nextMidnight = calendar.date(byAdding: .day, value: 1, to: dayStart) {
+            end = nextMidnight
+        }
         let interval = Interval(start: start, end: end)
         return interval.isEmpty ? nil : interval
     }
 
     private static func resolve(_ time: TimeOfDay, on dayStart: Date, calendar: Calendar) -> Date? {
-        if time.hour >= 24 {
-            return calendar.date(byAdding: .day, value: 1, to: dayStart)
-        }
         return calendar.date(
             bySettingHour: time.hour,
             minute: time.minute,

@@ -70,8 +70,8 @@ final class BlockPlannerTests: XCTestCase {
         XCTAssertEqual(merged, [iv(ny(2026, 6, 1, 8), ny(2026, 6, 2, 17))])
     }
 
-    func testEndOfDayHour24() {
-        let config = nyConfig { $0.workingHours = DayHours(start: TimeOfDay(hour: 20), end: TimeOfDay(hour: 24)) }
+    func testEndTimeOfMidnightMeansEndOfDay() {
+        let config = nyConfig { $0.workingHours = DayHours(start: TimeOfDay(hour: 20), end: TimeOfDay(hour: 0)) }
         XCTAssertEqual(plan([event(ny(2026, 6, 1, 19), ny(2026, 6, 2, 3))], config),
                        [iv(ny(2026, 6, 1, 20), ny(2026, 6, 2, 0))])
     }
