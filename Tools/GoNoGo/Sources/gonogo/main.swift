@@ -88,8 +88,9 @@ func removeMarked(_ events: [EKEvent]) -> Int {
 
 if cleanup {
     let now = Date()
-    let predicate = store.predicateForEvents(withStart: now, end: now.addingTimeInterval(7 * 86400), calendars: [calendar])
-    print("Cleanup: deleted \(removeMarked(store.events(matching: predicate))) test event(s).")
+    // Look back too: the kept 03:00 event may already have ended.
+    let predicate = store.predicateForEvents(withStart: now.addingTimeInterval(-30 * 86400), end: now.addingTimeInterval(7 * 86400), calendars: [calendar])
+    print("Cleanup (last 30 days to next 7): deleted \(removeMarked(store.events(matching: predicate))) test event(s).")
     exit(0)
 }
 

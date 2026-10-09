@@ -4,8 +4,9 @@ import Foundation
 public enum BlockPlanner {
     /// Pure function: the same inputs always give the same sorted, non-overlapping
     /// (when merging) intervals, all inside `window` and inside working hours.
-    public static func plan(events: [SourceEvent], config: Config, window: Interval) -> [Interval] {
-        let calendar = config.calendar
+    public static func plan(events: [SourceEvent], config: Config, window: Interval) throws -> [Interval] {
+        try config.validate()
+        guard let calendar = config.calendar else { throw ConfigError.invalidTimeZone(config.timeZoneIdentifier) }
         let before = TimeInterval(config.paddingBeforeMinutes * 60)
         let after = TimeInterval(config.paddingAfterMinutes * 60)
 

@@ -4,7 +4,7 @@ import XCTest
 final class BlockPlannerTests: XCTestCase {
     // 2026-06-01 is a Monday.
     private func plan(_ events: [SourceEvent], _ config: Config = nyConfig()) -> [Interval] {
-        BlockPlanner.plan(events: events, config: config, window: wideWindow)
+        try! BlockPlanner.plan(events: events, config: config, window: wideWindow)
     }
 
     // MARK: Working hours
@@ -171,16 +171,16 @@ final class BlockPlannerTests: XCTestCase {
 
     // MARK: Window
 
-    func testWindowBoundsOutput() {
+    func testWindowBoundsOutput() throws {
         let window = iv(ny(2026, 6, 2), ny(2026, 6, 3))
-        let blocks = BlockPlanner.plan(events: [event(ny(2026, 6, 1, 9), ny(2026, 6, 4, 18))],
+        let blocks = try BlockPlanner.plan(events: [event(ny(2026, 6, 1, 9), ny(2026, 6, 4, 18))],
                                        config: nyConfig { $0.mergeEnabled = false }, window: window)
         XCTAssertEqual(blocks, [iv(ny(2026, 6, 2, 8), ny(2026, 6, 2, 17))])
     }
 
-    func testConfigWindow() {
+    func testConfigWindow() throws {
         let config = nyConfig { $0.lookaheadDays = 30 }
-        let window = config.window(now: ny(2026, 3, 1, 15))
+        let window = try config.window(now: ny(2026, 3, 1, 15))
         XCTAssertEqual(window, iv(ny(2026, 3, 1), ny(2026, 3, 31)))
     }
 
